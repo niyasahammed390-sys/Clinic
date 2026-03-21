@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Billing</h2>
+
+<a href="/bill/add/" class="btn btn-warning mb-3">Add Bill</a>
+
+<table class="table table-bordered">
+<tr>
+    <th>Patient</th>
+    <th>Amount</th>
+    <th>Date</th>
+    <th>Invoice</th>
+</tr>
+
+{% for b in bills %}
+<tr>
+    <td>{{ b.patient.name }}</td>
+    <td>{{ b.amount }}</td>
+    <td>{{ b.date }}</td>
+    <td><a href="/bill/pdf/{{ b.id }}/" class="btn btn-sm btn-success">PDF</a></td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

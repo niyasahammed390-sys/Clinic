@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Appointments</h2>
+
+<a href="/appointment/add/" class="btn btn-success mb-3">Add Appointment</a>
+
+<table class="table table-bordered">
+<tr>
+    <th>Patient</th>
+    <th>Date</th>
+    <th>Time</th>
+</tr>
+
+{% for a in appointments %}
+<tr>
+    <td>{{ a.patient.name }}</td>
+    <td>{{ a.date }}</td>
+    <td>{{ a.time }}</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

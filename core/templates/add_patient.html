@@ -1,0 +1,9 @@
+<h2>Add Patient</h2>
+
+<form method="POST">
+{% csrf_token %}
+<input name="name" placeholder="Name"><br>
+<input name="age" placeholder="Age"><br>
+<input name="phone" placeholder="Phone"><br>
+<button>Save</button>
+</form>

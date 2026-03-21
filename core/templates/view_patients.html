@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Patients</h2>
+
+<a href="/add/" class="btn btn-primary mb-3">Add Patient</a>
+
+<table class="table table-bordered">
+<tr>
+    <th>Name</th>
+    <th>Age</th>
+    <th>Phone</th>
+</tr>
+
+{% for p in patients %}
+<tr>
+    <td>{{ p.name }}</td>
+    <td>{{ p.age }}</td>
+    <td>{{ p.phone }}</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

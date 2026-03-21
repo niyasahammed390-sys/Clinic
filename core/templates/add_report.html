@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Add Lab Report</h2>
+
+<form method="POST" enctype="multipart/form-data">
+{% csrf_token %}
+
+<select name="patient" class="form-control mb-2">
+{% for p in patients %}
+<option value="{{ p.id }}">{{ p.name }}</option>
+{% endfor %}
+</select>
+
+<input name="report_name" class="form-control mb-2" placeholder="Report Name">
+
+<input type="file" name="file" class="form-control mb-2">
+
+<button class="btn btn-primary">Upload</button>
+</form>
+{% endblock %}

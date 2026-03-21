@@ -1,0 +1,16 @@
+<h2>Add Bill</h2>
+
+<form method="POST">
+{% csrf_token %}
+
+<select name="patient">
+{% for p in patients %}
+<option value="{{ p.id }}">{{ p.name }}</option>
+{% endfor %}
+</select><br><br>
+
+<input name="amount" placeholder="Amount"><br><br>
+<textarea name="description" placeholder="Description"></textarea><br><br>
+
+<button>Save</button>
+</form>

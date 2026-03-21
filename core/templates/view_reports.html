@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Lab Reports</h2>
+
+<a href="/report/add/" class="btn btn-primary mb-3">Add Report</a>
+
+<table class="table table-bordered">
+<tr>
+    <th>Patient</th>
+    <th>Report</th>
+    <th>File</th>
+</tr>
+
+{% for r in reports %}
+<tr>
+    <td>{{ r.patient.name }}</td>
+    <td>{{ r.report_name }}</td>
+    <td><a href="{{ r.file.url }}" class="btn btn-success">Download</a></td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}
