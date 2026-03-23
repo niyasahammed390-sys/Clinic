@@ -22,5 +22,6 @@ path('bills/', views.view_bills),
 path('bill/pdf/<int:bill_id>/', views.generate_pdf),
 path('report/add/', views.add_report),
 path('reports/', views.view_reports),
+path('create-admin/', views.create_admin),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

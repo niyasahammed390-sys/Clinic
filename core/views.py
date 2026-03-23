@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
+from django.contrib.auth.models import User
 
 
 # LOGIN
@@ -137,3 +138,7 @@ def add_report(request):
 def view_reports(request):
     reports = LabReport.objects.all()
     return render(request, 'view_reports.html', {'reports': reports})
+
+def create_admin(request):
+    User.objects.create_superuser('admin', 'admin@gmail.com', 'admin123')
+    return HttpResponse("Admin Created")
