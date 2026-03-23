@@ -34,3 +34,29 @@ class LabReport(models.Model):
 
     def __str__(self):
         return self.report_name
+
+class Prescription(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    doctor_name = models.CharField(max_length=100)
+    medicine = models.TextField()
+    notes = models.TextField()
+    date = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.patient.name
+
+class Doctor(models.Model):
+    name = models.CharField(max_length=100)
+    specialization = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+from django.contrib.auth.models import User
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    role = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.user.username

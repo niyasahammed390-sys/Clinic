@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Prescriptions</h2>
+
+<a href="/prescription/add/" class="btn btn-primary mb-3">Add</a>
+
+<table class="table table-bordered">
+<tr>
+    <th>Patient</th>
+    <th>Doctor</th>
+    <th>Medicine</th>
+    <th>Date</th>
+</tr>
+
+{% for p in prescriptions %}
+<tr>
+    <td>{{ p.patient.name }}</td>
+    <td>{{ p.doctor_name }}</td>
+    <td>{{ p.medicine }}</td>
+    <td>{{ p.date }}</td>
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}
+<td>
+<a href="/prescription/pdf/{{ p.id }}/" class="btn btn-success">PDF</a>
+</td>

@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect
-from .models import Patient, Appointment,Billing,LabReport
+from .models import Patient, Appointment,Billing,LabReport,Prescription,Patient
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
 from django.contrib.auth.models import User
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .serializers import PatientSerializer
 
 
 # LOGIN
@@ -142,3 +145,73 @@ def view_reports(request):
 def create_admin(request):
     User.objects.create_superuser('admin', 'admin@gmail.com', 'admin123')
     return HttpResponse("Admin Created")
+
+@login_required
+def view_patients(request):
+    query = request.GET.get('q')
+    
+    if query:
+        patients = Patient.objects.filter(name__icontains=query)
+    else:
+        patients = Patient.objects.all()
+
+    return render(request, 'view_patients.html', {'patients': patients})
+
+@login_required
+def add_prescription(request):
+    if request.method == 'POST':
+        Prescription.objects.create(
+            patient=Patient.objects.get(id=request.POST['patient']),
+            doctor_name=request.POST['doctor'],
+            medicine=request.POST['medicine'],
+            notes=request.POST['notes']
+        )
+        return redirect('/prescriptions')
+
+    patients = Patient.objects.all()
+    return render(request, 'add_prescription.html', {'patients': patients})
+
+@login_required
+def view_prescriptions(request):
+    prescriptions = Prescription.objects.all()
+    return render(request, 'view_prescriptions.html', {'prescriptions': prescriptions})
+
+from django.db.models import Sum
+
+@login_required
+def home(request):
+    total_patients = Patient.objects.count()
+    total_appointments = Appointment.objects.count()
+    total_revenue = Billing.objects.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    return render(request, 'home.html', {
+        'patients': total_patients,
+        'appointments': total_appointments,
+        'revenue': total_revenue
+    })
+
+def prescription_pdf(request, id):
+    p = Prescription.objects.get(id=id)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="prescription.pdf"'
+
+    c = canvas.Canvas(response)
+
+    c.drawString(100, 800, "Clinic Prescription")
+    c.drawString(100, 770, f"Patient: {p.patient.name}")
+    c.drawString(100, 750, f"Doctor: {p.doctor_name}")
+    c.drawString(100, 730, f"Medicine: {p.medicine}")
+    c.drawString(100, 710, f"Notes: {p.notes}")
+
+    c.save()
+    return response
+
+def is_doctor(user):
+    return user.profile.role == 'doctor'
+
+@api_view(['GET'])
+def api_patients(request):
+    patients = Patient.objects.all()
+    serializer = PatientSerializer(patients, many=True)
+    return Response(serializer.data)

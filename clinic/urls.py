@@ -6,6 +6,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/patients/', views.api_patients),
 
     path('login/', views.login_page),
     path('logout/', views.logout_page),
@@ -23,5 +24,8 @@ path('bill/pdf/<int:bill_id>/', views.generate_pdf),
 path('report/add/', views.add_report),
 path('reports/', views.view_reports),
 path('create-admin/', views.create_admin),
+path('prescription/add/', views.add_prescription),
+path('prescriptions/', views.view_prescriptions),
+path('prescription/pdf/<int:id>/', views.prescription_pdf),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

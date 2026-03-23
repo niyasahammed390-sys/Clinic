@@ -1,29 +1,37 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Clinic App',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: PatientScreen(),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const PatientPage(),
     );
   }
 }
 
-class PatientScreen extends StatefulWidget {
+class PatientPage extends StatefulWidget {
+  const PatientPage({super.key});
+
   @override
-  _PatientScreenState createState() => _PatientScreenState();
+  State<PatientPage> createState() => _PatientPageState();
 }
 
-class _PatientScreenState extends State<PatientScreen> {
+class _PatientPageState extends State<PatientPage> {
   List patients = [];
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -31,14 +39,27 @@ class _PatientScreenState extends State<PatientScreen> {
     fetchPatients();
   }
 
+  // 🔥 FETCH DATA FROM YOUR DJANGO API
   fetchPatients() async {
-    final response = await http.get(
-      Uri.parse('https://clinic-vxma.onrender.com/api/patients/')
-    );
+    try {
+      final response = await http.get(
+        Uri.parse('https://clinic-vxma.onrender.com/api/patients/'),
+      );
 
-    if (response.statusCode == 200) {
+      print(response.body); // Debug
+
+      if (response.statusCode == 200) {
+        setState(() {
+          patients = json.decode(response.body);
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load patients');
+      }
+    } catch (e) {
+      print("Error: $e");
       setState(() {
-        patients = json.decode(response.body);
+        isLoading = false;
       });
     }
   }
@@ -46,21 +67,37 @@ class _PatientScreenState extends State<PatientScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Patients")),
-      body: patients.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: patients.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: EdgeInsets.all(10),
-                  child: ListTile(
-                    title: Text(patients[index]['name']),
-                    subtitle: Text("Phone: ${patients[index]['phone']}"),
-                  ),
-                );
-              },
-            ),
+      appBar: AppBar(
+        title: const Text("Patients"),
+        centerTitle: true,
+      ),
+
+      // 🔥 BODY
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : patients.isEmpty
+              ? const Center(child: Text("No Patients Found"))
+              : ListView.builder(
+                  itemCount: patients.length,
+                  itemBuilder: (context, index) {
+                    final p = patients[index];
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      elevation: 3,
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          child: Text(p['name'][0]),
+                        ),
+                        title: Text(p['name']),
+                        subtitle: Text(
+                          "Age: ${p['age']} | Phone: ${p['phone'] ?? ''}",
+                        ),
+                      ),
+                    );
+                  },
+                ),
     );
   }
 }
