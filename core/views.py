@@ -215,3 +215,21 @@ def api_patients(request):
     patients = Patient.objects.all()
     serializer = PatientSerializer(patients, many=True)
     return Response(serializer.data)
+
+@api_view(['POST'])
+def api_login(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    user = authenticate(username=username, password=password)
+
+    if user is not None:
+        return Response({
+            "status": "success",
+            "message": "Login successful"
+        })
+    else:
+        return Response({
+            "status": "error",
+            "message": "Invalid credentials"
+        })
