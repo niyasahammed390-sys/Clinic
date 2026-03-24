@@ -28,9 +28,9 @@ class _LoginPageState extends State<LoginPage> {
   String message = "";
 
   Future<void> login() async {
-  try {
-    final url = Uri.parse("https://clinic-vxma.onrender.com/login/");
+  final url = Uri.parse("https://clinic-vxma.onrender.com/login/");
 
+  try {
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -45,25 +45,23 @@ class _LoginPageState extends State<LoginPage> {
 
     final data = jsonDecode(response.body);
 
-    if (data["status"] == "success") {
+    if (response.statusCode == 200 && data["status"] == "success") {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => Dashboard()),
       );
     } else {
       setState(() {
-        message = data["message"];
+        message = data["message"] ?? "Login failed";
       });
     }
-
   } catch (e) {
-    print("FULL ERROR: $e");
+    print("ERROR: $e");
     setState(() {
       message = "Connection error";
     });
   }
 }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
