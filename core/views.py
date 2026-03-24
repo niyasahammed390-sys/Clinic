@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect
 from .models import Patient, Appointment,Billing,LabReport,Prescription,Patient
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from reportlab.pdfgen import canvas
 from django.contrib.auth.models import User
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import PatientSerializer
+import json
 
 
 # LOGIN
@@ -107,7 +108,7 @@ def view_bills(request):
     bills = Billing.objects.all()
     return render(request, 'view_bills.html', {'bills': bills})
 
-def generate_pdf(request, bill_id):
+def generate_bill_pdf(request, bill_id):
     bill = Billing.objects.get(id=bill_id)
 
     response = HttpResponse(content_type='application/pdf')
@@ -143,8 +144,10 @@ def view_reports(request):
     return render(request, 'view_reports.html', {'reports': reports})
 
 def create_admin(request):
-    User.objects.create_superuser('admin', 'admin@gmail.com', 'admin123')
-    return HttpResponse("Admin Created")
+    if not User.objects.filter(username="admin").exists():
+        User.objects.create_superuser("admin", "admin@gmail.com", "1234")
+        return HttpResponse("Admin created")
+    return HttpResponse("Already exists")
 
 @login_required
 def view_patients(request):
@@ -190,7 +193,7 @@ def home(request):
         'revenue': total_revenue
     })
 
-def prescription_pdf(request, id):
+def generate_prescription_pdf(request, id):
     p = Prescription.objects.get(id=id)
 
     response = HttpResponse(content_type='application/pdf')
@@ -233,3 +236,29 @@ def api_login(request):
             "status": "error",
             "message": "Invalid credentials"
         })
+
+def login_view(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+        except:
+            return JsonResponse({"status": "error", "message": "Invalid JSON"})
+
+        username = data.get("username")
+        password = data.get("password")
+
+        user = authenticate(username=username, password=password)
+
+        if user is not None:
+            return JsonResponse({"status": "success"})
+        else:
+            return JsonResponse({
+                "status": "error",
+                "message": "Invalid username or password"
+            })
+
+    return JsonResponse({"status": "error", "message": "Only POST allowed"})
+
+def logout_view(request):
+    logout(request)
+    return redirect('/login/')

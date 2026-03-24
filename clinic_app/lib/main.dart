@@ -3,101 +3,109 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Clinic App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const PatientPage(),
+      home: LoginPage(),
     );
   }
 }
 
-class PatientPage extends StatefulWidget {
-  const PatientPage({super.key});
-
+class LoginPage extends StatefulWidget {
   @override
-  State<PatientPage> createState() => _PatientPageState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class _PatientPageState extends State<PatientPage> {
-  List patients = [];
-  bool isLoading = true;
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController username = TextEditingController();
+  final TextEditingController password = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    fetchPatients();
+  String message = "";
+
+  Future<void> login() async {
+    final url = Uri.parse("https://clinic-vxma.onrender.com/login/");
+
+    final response = await http.post(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({
+      "username": username.text,
+      "password": password.text,
+    }),
+  );
+
+  print("STATUS: ${response.statusCode}");
+  print("BODY: ${response.body}");
+
+
+    final data = jsonDecode(response.body);
+
+  if (data["status"] == "success") {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Dashboard()),
+    );
+  } else {
+    setState(() {
+      message = data["message"] ?? "Login failed";
+    });
   }
-
-  // 🔥 FETCH DATA FROM YOUR DJANGO API
-  fetchPatients() async {
-    try {
-      final response = await http.get(
-        Uri.parse('https://clinic-vxma.onrender.com/api/patients/'),
-      );
-
-      print(response.body); // Debug
-
-      if (response.statusCode == 200) {
-        setState(() {
-          patients = json.decode(response.body);
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Failed to load patients');
-      }
-    } catch (e) {
-      print("Error: $e");
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Patients"),
-        centerTitle: true,
+      body: Center(
+        child: Container(
+          padding: EdgeInsets.all(20),
+          width: 300,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Clinic Login", style: TextStyle(fontSize: 22)),
+              SizedBox(height: 20),
+
+              TextField(
+                controller: username,
+                decoration: InputDecoration(labelText: "Username"),
+              ),
+
+              TextField(
+                controller: password,
+                obscureText: true,
+                decoration: InputDecoration(labelText: "Password"),
+              ),
+
+              SizedBox(height: 20),
+
+              ElevatedButton(
+                onPressed: login,
+                child: Text("Login"),
+              ),
+
+              SizedBox(height: 10),
+              Text(message, style: TextStyle(color: Colors.red)),
+            ],
+          ),
+        ),
       ),
+    );
+  }
+}
 
-      // 🔥 BODY
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : patients.isEmpty
-              ? const Center(child: Text("No Patients Found"))
-              : ListView.builder(
-                  itemCount: patients.length,
-                  itemBuilder: (context, index) {
-                    final p = patients[index];
-
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      elevation: 3,
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          child: Text(p['name'][0]),
-                        ),
-                        title: Text(p['name']),
-                        subtitle: Text(
-                          "Age: ${p['age']} | Phone: ${p['phone'] ?? ''}",
-                        ),
-                      ),
-                    );
-                  },
-                ),
+class Dashboard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Dashboard")),
+      body: Center(
+        child: Text("Welcome to Clinic App 🎉"),
+      ),
     );
   }
 }
