@@ -28,31 +28,38 @@ class _LoginPageState extends State<LoginPage> {
   String message = "";
 
   Future<void> login() async {
+  try {
     final url = Uri.parse("https://clinic-vxma.onrender.com/login/");
 
     final response = await http.post(
-    url,
-    headers: {"Content-Type": "application/json"},
-    body: jsonEncode({
-      "username": username.text,
-      "password": password.text,
-    }),
-  );
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "username": username.text,
+        "password": password.text,
+      }),
+    );
 
-  print("STATUS: ${response.statusCode}");
-  print("BODY: ${response.body}");
-
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
 
     final data = jsonDecode(response.body);
 
-  if (data["status"] == "success") {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => Dashboard()),
-    );
-  } else {
+    if (data["status"] == "success") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Dashboard()),
+      );
+    } else {
+      setState(() {
+        message = data["message"];
+      });
+    }
+
+  } catch (e) {
+    print("FULL ERROR: $e");
     setState(() {
-      message = data["message"] ?? "Login failed";
+      message = "Connection error";
     });
   }
 }
@@ -89,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
 
               SizedBox(height: 10),
-              Text(message, style: TextStyle(color: Colors.red)),
+              Text(message, style: TextStyle(color: Colors.red,fontSize: 16)),
             ],
           ),
         ),
